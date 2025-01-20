@@ -30,7 +30,7 @@ public class BookServiceImpl implements BookService {
         }
 
         // Busca en la API externa
-        Optional<BookResponse> firstBook = gutendexClient.fetchBooks("search=" + query)
+        Optional<BookResponse> firstBook = gutendexClient.search(query)
                                                          .stream()
                                                          .findFirst();
 

@@ -11,5 +11,5 @@ public interface GutendexClient {
      * @param query Parámetros de consulta para filtrar los libros.
      * @return Lista de libros obtenida de la API.
      */
-    List<BookResponse> fetchBooks(String query);
+    List<BookResponse> search(String query);
 }

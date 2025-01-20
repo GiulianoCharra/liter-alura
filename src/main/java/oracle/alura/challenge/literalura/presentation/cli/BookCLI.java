@@ -54,11 +54,10 @@ public class BookCLI implements CommandLineRunner {
     private void showMenu() {
         System.out.println("\n===== Catálogo de Libros =====");
         System.out.println("1. Buscar libro por titulo o autor");
-        System.out.println("3. Guardar libro en favoritos");
-        System.out.println("4. Listar todos los libros");
+        System.out.println("2. Listar todos los libros");
+        System.out.println("3. Listar todos los autores");
+        System.out.println("4. Listar autores vivos en un año");
         System.out.println("5. Listar todos los libros por idioma");
-        System.out.println("5. Listar todos los autores");
-        System.out.println("6. Listar autores vivos en un año");
         System.out.println("0. Salir");
         System.out.println("==============================");
     }
