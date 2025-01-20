@@ -1,8 +1,9 @@
 package oracle.alura.challenge.literalura.presentation.cli;
 
 import oracle.alura.challenge.literalura.application.service.BookService;
+import oracle.alura.challenge.literalura.domain.entities.Author;
+import oracle.alura.challenge.literalura.domain.entities.Book;
 import oracle.alura.challenge.literalura.infrastructure.client.BookProcessor;
-import oracle.alura.challenge.literalura.infrastructure.client.dto.BookResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -38,8 +39,10 @@ public class BookCLI implements CommandLineRunner {
 
             switch (input) {
                 case "1" -> searchBooks(scanner);
-                case "2" -> getBookDetails(scanner);
-                case "3" -> saveBookToFavorites(scanner);
+                case "2" -> listAllBooks();
+                case "3" -> listAllAuthors();
+                case "4" -> listAuthorsAliveInYear(scanner);
+                case "5" -> listAllBooksByLanguage(scanner);
                 case "0" -> {
                     System.out.println("Saliendo del programa...");
                     exit = true;
@@ -48,55 +51,78 @@ public class BookCLI implements CommandLineRunner {
             }
         }
     }
-
     private void showMenu() {
         System.out.println("\n===== Catálogo de Libros =====");
-        System.out.println("1. Buscar libros");
-        System.out.println("2. Ver detalles de un libro");
+        System.out.println("1. Buscar libro por titulo o autor");
         System.out.println("3. Guardar libro en favoritos");
+        System.out.println("4. Listar todos los libros");
+        System.out.println("5. Listar todos los libros por idioma");
+        System.out.println("5. Listar todos los autores");
+        System.out.println("6. Listar autores vivos en un año");
         System.out.println("0. Salir");
         System.out.println("==============================");
     }
 
     private void searchBooks(Scanner scanner) {
         System.out.print("Ingrese un término de búsqueda: ");
-        String             query = scanner.nextLine();
-        List<BookResponse> books = bookService.searchBooks(query);
-        if (books.isEmpty()) {
-            System.out.println("No se encontraron libros para el término: " + query);
+        String query = scanner.nextLine();
+        Book   book  = bookService.searchBook(query);
+        if (book == null) {
+            System.out.println("No se encontro ningún libro con el término de búsqueda: " + query);
             return;
         }
         System.out.println("Resultados de la búsqueda:");
-        books.forEach(book -> System.out.println(" - " + book.title()));
+        System.out.println(" - " + book.getTitle());
     }
-    private void getBookDetails(Scanner scanner) {
-        System.out.print("Ingrese el ID del libro: ");
-        try {
-            int          bookId = Integer.parseInt(scanner.nextLine());
-            BookResponse book   = bookService.getBookDetails(bookId);
-            if (book != null) {
-                System.out.println("Detalles del libro:");
-                bookProcessor.displayBook(book);
-            } else {
-                System.out.println("No se encontró el libro con ID: " + bookId);
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("El ID debe ser un número válido.");
+
+    private void listAllBooks() {
+        List<Book> books = bookService.getAllBooks();
+        if (books.isEmpty()) {
+            System.out.println("No hay libros disponibles.");
+        } else {
+            System.out.println("Lista de libros:");
+            books.forEach(book -> System.out.println(" - " + book.getTitle()));
         }
     }
 
-    private void saveBookToFavorites(Scanner scanner) {
-        System.out.print("Ingrese el ID del libro que desea guardar: ");
+    private void listAllAuthors() {
+        List<Author> people = bookService.getAllAuthors();
+        if (people.isEmpty()) {
+            System.out.println("No hay autores disponibles.");
+        } else {
+            people.forEach(author ->
+                                   System.out.println("Nombre: " + author.getName() +
+                                                              ", Año de Nacimiento: " + author.getBirthYear() +
+                                                              ", Año de Fallecimiento: " + (author.getDeathYear() != null ? author.getDeathYear() : "Vivo"))
+                          );
+        }
+    }
+
+    private void listAuthorsAliveInYear(Scanner scanner) {
+        System.out.print("Ingrese un año para buscar autores vivos: ");
         try {
-            int     bookId  = Integer.parseInt(scanner.nextLine());
-            boolean success = bookService.saveBookToFavorites(bookId);
-            if (success) {
-                System.out.println("El libro fue guardado en favoritos.");
+            int          year   = Integer.parseInt(scanner.nextLine());
+            List<Author> people = bookService.getAuthorsAliveInYear(year);
+            if (people.isEmpty()) {
+                System.out.println("No se encontraron autores vivos en el año " + year + ".");
             } else {
-                System.out.println("No se pudo guardar el libro en favoritos. Verifique el ID.");
+                people.forEach(author ->
+                                       System.out.println("Nombre: " + author.getName() + ", Año de Nacimiento: " + author.getBirthYear())
+                              );
             }
         } catch (NumberFormatException e) {
-            System.out.println("El ID debe ser un número válido.");
+            System.out.println("El año debe ser un número válido.");
+        }
+    }
+
+    private void listAllBooksByLanguage(Scanner scanner) {
+        System.out.print("Ingrese un idioma para buscar libros: ");
+        String     language = scanner.nextLine();
+        List<Book> books    = bookService.getAllBooksByLanguage(language);
+        if (books.isEmpty()) {
+            System.out.println("No se encontraron libros en el idioma " + language + ".");
+        } else {
+            books.forEach(book -> System.out.println(" - " + book.getTitle()));
         }
     }
 }
